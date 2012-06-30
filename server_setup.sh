@@ -35,9 +35,12 @@ sudo make install
 
 cd ..
 
-sudo apt-get install aptitude
-
-sudo apt-get install mysql-server libmysqlclient-dev mysql-common libpq5 libpcre3 libpcre3-dev libcurl4-openssl-dev
+sudo apt-get -y install mysql-server
+sudo apt-get -y install libmysqlclient-dev
+sudo apt-get -y install mysql-common
+sudo apt-get -y install libpq5
+sudo apt-get -y install libpcre3
+sudo apt-get -y install libpcre3-dev
 
 wget http://sphinxsearch.com/files/sphinx-2.0.4-release.tar.gz
 tar xzvf sphinx-2.0.4-release.tar.gz
@@ -49,4 +52,18 @@ cd ..
 
 rvmsudo gem install passenger
 
+sudo apt-get -y install libcurl4-openssl-dev
+
 rvmsudo passenger-install-nginx-module
+
+wget -O init-deb.sh http://library.linode.com/assets/660-init-deb.sh
+
+sudo mv init-deb.sh /etc/init.d/nginx
+
+sudo chmod +x /etc/init.d/nginx
+
+sudo /usr/sbin/update-rc.d -f nginx defaults
+
+rvmsudo gem install sinatra
+
+sudo apt-get -y install libmysql-ruby libmysqlclient-dev
