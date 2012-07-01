@@ -45,7 +45,7 @@ sudo apt-get -y install libpcre3-dev
 wget http://sphinxsearch.com/files/sphinx-2.0.4-release.tar.gz
 tar xzvf sphinx-2.0.4-release.tar.gz
 cd sphinx-2.0.4-release
-./configure --prefix=/usr/local/sphinx 
+./configure --prefix=/usr/local/sphinx --with-mysql 
 sudo make
 sudo make install
 cd ..
