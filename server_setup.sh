@@ -42,13 +42,15 @@ sudo apt-get -y install libpq5
 sudo apt-get -y install libpcre3
 sudo apt-get -y install libpcre3-dev
 
-wget http://sphinxsearch.com/files/sphinx-2.0.4-release.tar.gz
-tar xzvf sphinx-2.0.4-release.tar.gz
-cd sphinx-2.0.4-release
-./configure --prefix=/usr/local/sphinx --with-mysql 
-sudo make
-sudo make install
-cd ..
+#wget http://sphinxsearch.com/files/sphinx-2.0.4-release.tar.gz
+#tar xzvf sphinx-2.0.4-release.tar.gz
+#cd sphinx-2.0.4-release
+#./configure --prefix=/usr/local/sphinx --with-mysql 
+#sudo make
+#sudo make install
+#cd ..
+
+sudo apt-get install sphinxsearch
 
 rvmsudo gem install passenger
 
