@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require "rubygems"
+
 `rvmsudo gem install sinatra`
 
 `eval \`ssh-agent\``
