@@ -6,6 +6,8 @@ require "rubygems"
 require "sinatra"
 require "json"
 
+`nohup rake ts:dd &`
+
 # Configure this with the directory path for the Web server's clone of the Git repo
 PROJECT_DIR = Dir.getwd
 GIT_DIR = PROJECT_DIR + '/.git'
