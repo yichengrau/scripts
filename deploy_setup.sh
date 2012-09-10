@@ -8,4 +8,4 @@ ssh-add
 
 nohup ruby -rubygems ./auto_deploy.rb  -p 10304 &
 
-sudo rake ts:dd
+nohup rvmsudo rake ts:dd &
