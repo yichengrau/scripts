@@ -7,7 +7,8 @@ require "sinatra"
 require "json"
 
 # Configure this with the directory path for the Web server's clone of the Git repo
-PROJECT_DIR = Dir.getwd
+#PROJECT_DIR = Dir.getwd
+PROJECT_DIR = 'deploy/agnes_rails'
 GIT_DIR = PROJECT_DIR + '/.git'
 
 # Configure the mappings between Git branches and Web document roots
