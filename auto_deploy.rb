@@ -10,79 +10,90 @@ require "json"
 PROJECT_DIR = Dir.getwd
 GIT_DIR = PROJECT_DIR + '/.git'
 
-need_reset_db = false
-
 # Configure the mappings between Git branches and Web document roots
 branch_to_working_directory = {
-'master' => PROJECT_DIR,
-'development' => PROJECT_DIR,
-'deploy_script' => PROJECT_DIR
+'development' => PROJECT_DIR
 }
 
 count = 0
 
 get '/' do
-"Hello World"
+  "Hello World"
 end
 
 post '/' do
-push = JSON.parse(params[:payload])
-
-print "#{push}\n\n"
-
-ref = push['ref'] || raise("ref required in payload")
-branch = ref.match(/([^\/]+)$/)[0]
-work_dir = branch_to_working_directory[branch]
-warn "Got Github hook for ref #{ref}, branch #{branch}, work_dir #{work_dir}"
-
-commits = push['commits'][0]
-
-print "#{commits}\n\n"
-
-added_files = commits["added"]
-modified_files = commits["modified"]
-removed_files = commits["removed"]
-
-all_changed_files = added_files + modified_files + removed_files
-
-all_changed_files.each do |f|
-  need_reset_db = true if f.include?("db/migrate/")
-end
-
-# load the new code from remote repository
-system "git --git-dir=#{GIT_DIR} --work-tree=#{work_dir} add ."
-system "git --git-dir=#{GIT_DIR} --work-tree=#{work_dir} fetch"
-system "git --git-dir=#{GIT_DIR} --work-tree=#{work_dir} reset --hard -q origin/#{branch}"
-
-# bundle install
-`bundle install`
-
-if need_reset_db
-
-  # update database
-  `rake db:drop`
-  `rake db:create`
-  `rake db:migrate`
+  push = JSON.parse(params[:payload])
   
-  #search engine re-index
-  searchd_pid_str = `cat #{PROJECT_DIR}/log/searchd.*.pid`
+  puts "COMMIT----[#{DateTime.now}]"
   
-  print "searchd_pid_str: [#{searchd_pid_str}]\n\n"
+  puts "#{push}"
   
+  ref = push['ref'] || raise("ref required in payload")
+  branch = ref.match(/([^\/]+)$/)[0]
+  work_dir = branch_to_working_directory[branch]
   
-  if !searchd_pid_str.nil?
-    `rake ts:stop`
+  puts "Got Github hook for ref #{ref}, branch #{branch}"
+  
+  if !work_dir.nil?
+    puts "work_dir #{work_dir}"
+    
+    commits = push['commits'][0]
+    
+    puts "#{commits}"
+    
+    added_files = commits["added"]
+    modified_files = commits["modified"]
+    removed_files = commits["removed"]
+    
+    all_changed_files = added_files + modified_files + removed_files
+    
+    need_reset_db = false
+    
+    all_changed_files.each do |f|
+      need_reset_db = true if f.include?("db/migrate/")
+    end
+    
+    # load the new code from remote repository
+    system "git --git-dir=#{GIT_DIR} --work-tree=#{work_dir} add ."
+    system "git --git-dir=#{GIT_DIR} --work-tree=#{work_dir} fetch"
+    system "git --git-dir=#{GIT_DIR} --work-tree=#{work_dir} reset --hard -q origin/#{branch}"
+    
+    # bundle install
+    `bundle install`
+    
+    if need_reset_db
+      
+      puts "refresh Database..."
+      
+      # update database
+      `rake db:drop`
+      `rake db:create`
+      `rake db:migrate`
+      
+      puts "search engine re-index..."
+      
+      #search engine re-index
+      searchd_pid_str = `cat #{PROJECT_DIR}/log/searchd.*.pid`
+      
+      puts "searchd_pid_str: [#{searchd_pid_str}]..."
+      
+      if !searchd_pid_str.nil?
+        `rake ts:stop`
+      end
+      
+      `rake ts:index`
+      `rake ts:start`
+      
+    end
+    
+    put "restart server..."
+    
+    # stop nginx
+    `sudo /etc/init.d/nginx stop`
+    
+    # start nginx
+    `sudo /etc/init.d/nginx start`
   end
   
-  `rake ts:index`
-  `rake ts:start`
-  
-end
-
-# stop nginx
-`sudo /etc/init.d/nginx stop`
-
-# start nginx
-`sudo /etc/init.d/nginx start`
-
+  put "end...\n"
 end
