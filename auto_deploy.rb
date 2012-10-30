@@ -39,36 +39,36 @@ post '/' do
     puts "fetch new code..."
     
     # load the new code from remote repository
-    system "git --git-dir=#{GIT_DIR} --work-tree=#{work_dir} add ."
-    system "git --git-dir=#{GIT_DIR} --work-tree=#{work_dir} fetch"
-    system "git --git-dir=#{GIT_DIR} --work-tree=#{work_dir} reset --hard -q origin/#{branch}"
+    puts `git --git-dir=#{GIT_DIR} --work-tree=#{work_dir} add .`
+    puts `git --git-dir=#{GIT_DIR} --work-tree=#{work_dir} fetch`
+    puts `git --git-dir=#{GIT_DIR} --work-tree=#{work_dir} reset --hard -q origin/#{branch}`
     
-     puts "bundle install..."
+    puts "bundle install..."
     
     # bundle install
-    `bundle install`
+    puts`bundle install --gemfile=#{PROJECT_DIR}/Gemfile`
     
     if need_reset_db
       
       puts "refresh Database..."
       
       # update database
-      `rake -f #{PROJECT_DIR}/Rakefile --trace db:drop`      `rake -f #{PROJECT_DIR}/Rakefile --trace db:create`      `rake -f #{PROJECT_DIR}/Rakefile --trace db:migrate`
+      puts `rake -f #{PROJECT_DIR}/Rakefile --trace db:drop`      puts `rake -f #{PROJECT_DIR}/Rakefile --trace db:create`      puts `rake -f #{PROJECT_DIR}/Rakefile --trace db:migrate`
       
       searchd_pid = nil      searchd_pid = `pgrep searchd`
-      if !searchd_pid.nil?        `sudo kill -9 #{searchd_pid}`      end      puts "rebuild sphinx..."      `rake -f #{PROJECT_DIR}/Rakefile --trace ts:rebuild`
+      if !searchd_pid.nil?        puts `sudo kill -9 #{searchd_pid}`      end      puts "rebuild sphinx..."      puts `rake -f #{PROJECT_DIR}/Rakefile --trace ts:rebuild`
     end
     
-    put "restart server..."
+    puts "restart server..."
     
     # stop nginx
-    `sudo /etc/init.d/nginx stop`
+    puts `sudo /etc/init.d/nginx stop`
     
     # start nginx
-    `sudo /etc/init.d/nginx start`
+    puts `sudo /etc/init.d/nginx start`
   end
   
-  put "end...\n"
+  puts "end...\n"
 end
 
 
